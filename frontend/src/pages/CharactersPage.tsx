@@ -79,11 +79,21 @@ export function CharactersPage() {
   }
 
   const changePage = (nextPage: number) => {
+    if (!data?.info.pages) return
+
+    const targetPage = Math.min(Math.max(nextPage, 1), data.info.pages)
     const nextParams = new URLSearchParams(searchParams)
-    if (nextPage === 1) nextParams.delete('page')
-    else nextParams.set('page', String(nextPage))
+    if (targetPage === 1) nextParams.delete('page')
+    else nextParams.set('page', String(targetPage))
     setSearchParams(nextParams)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handlePageJump = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const value = Number(new FormData(event.currentTarget).get('page'))
+
+    if (Number.isInteger(value)) changePage(value)
   }
 
   const clearFilters = () => setSearchParams({})
@@ -210,10 +220,30 @@ export function CharactersPage() {
             })}
           </div>
 
-          <nav aria-label="Character pagination" className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <button type="button" disabled={!data.info.prev || isFetching} onClick={() => changePage(page - 1)} className="rounded-xl border border-white/10 px-5 py-2.5 font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Previous</button>
-            <p className="min-w-32 text-center text-sm text-slate-400">Page <strong className="text-white">{page}</strong> of <strong className="text-white">{data.info.pages}</strong></p>
-            <button type="button" disabled={!data.info.next || isFetching} onClick={() => changePage(page + 1)} className="rounded-xl border border-white/10 px-5 py-2.5 font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Next</button>
+          <nav aria-label="Character pagination" className="mt-10 flex flex-col items-center gap-5">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button type="button" disabled={page === 1 || isFetching} onClick={() => changePage(1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">First</button>
+              <button type="button" disabled={!data.info.prev || isFetching} onClick={() => changePage(page - 1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Previous</button>
+              <p className="min-w-32 text-center text-sm text-slate-400">Page <strong className="text-white">{page}</strong> of <strong className="text-white">{data.info.pages}</strong></p>
+              <button type="button" disabled={!data.info.next || isFetching} onClick={() => changePage(page + 1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Next</button>
+              <button type="button" disabled={page === data.info.pages || isFetching} onClick={() => changePage(data.info.pages)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Last</button>
+            </div>
+
+            <form onSubmit={handlePageJump} className="flex items-center gap-3">
+              <label htmlFor="page-jump" className="text-sm font-semibold text-slate-400">Go to page</label>
+              <input
+                key={page}
+                id="page-jump"
+                name="page"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max={data.info.pages}
+                defaultValue={page}
+                className="w-20 rounded-xl border border-white/10 bg-[#0b1b18] px-3 py-2.5 text-center text-white"
+              />
+              <button type="submit" disabled={isFetching} className="rounded-xl bg-cyan-300 px-4 py-2.5 text-sm font-black text-[#071311] hover:bg-cyan-200 disabled:opacity-50">Go</button>
+            </form>
           </nav>
         </>
       ) : null}
