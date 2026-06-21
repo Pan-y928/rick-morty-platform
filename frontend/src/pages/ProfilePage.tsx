@@ -1,8 +1,8 @@
 import { PageIntro } from '../components/PageIntro'
-import { useAuth } from '../auth/auth'
+import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
 
 export function ProfilePage() {
-  const { user } = useAuth()
+  const { user } = useCurrentUser()
 
   return (
     <>
