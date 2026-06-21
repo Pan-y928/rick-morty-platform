@@ -1,6 +1,5 @@
 import { useEffect, type PropsWithChildren } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { authKeys } from '../features/auth/hooks/authKeys'
 import { AUTH_UNAUTHORIZED_EVENT } from '../lib/tokenStorage'
 
 export function AuthSessionManager({ children }: PropsWithChildren) {
@@ -10,7 +9,7 @@ export function AuthSessionManager({ children }: PropsWithChildren) {
     localStorage.removeItem('demo-authenticated')
 
     const handleUnauthorized = () => {
-      queryClient.removeQueries({ queryKey: authKeys.all })
+      queryClient.clear()
     }
 
     window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized)

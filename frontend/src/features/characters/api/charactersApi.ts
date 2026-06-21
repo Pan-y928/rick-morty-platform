@@ -38,6 +38,25 @@ export async function getCharacter(id: number) {
   return data
 }
 
+export async function getCharactersByIds(ids: number[]) {
+  if (ids.length === 0) return []
+
+  const chunks = Array.from(
+    { length: Math.ceil(ids.length / 20) },
+    (_, index) => ids.slice(index * 20, index * 20 + 20),
+  )
+  const responses = await Promise.all(
+    chunks.map(async (chunk) => {
+      const { data } = await rickMortyClient.get<Character | Character[]>(
+        `/character/${chunk.join(',')}`,
+      )
+      return Array.isArray(data) ? data : [data]
+    }),
+  )
+
+  return responses.flat()
+}
+
 export async function getEpisodes(ids: number[]) {
   if (ids.length === 0) return []
 

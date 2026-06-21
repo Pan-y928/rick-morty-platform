@@ -5,8 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RickMorty.Api.DataAccess;
+using RickMorty.Api.DataAccess.External;
+using RickMorty.Api.DataAccess.Repositories;
 using RickMorty.Api.Domain.Entities;
 using RickMorty.Api.Services.Auth;
+using RickMorty.Api.Services.Favorites;
 using RickMorty.Api.Services.Token;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +51,13 @@ builder.Services.Configure<JwtOptions>(
     builder.Configuration.GetSection(JwtOptions.SectionName));
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IFavoriteCharacterRepository, FavoriteCharacterRepository>();
+builder.Services.AddScoped<IFavoriteCharacterService, FavoriteCharacterService>();
+builder.Services.AddHttpClient<ICharacterApiClient, CharacterApiClient>(client =>
+{
+    client.BaseAddress = new Uri("https://rickandmortyapi.com/api/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
