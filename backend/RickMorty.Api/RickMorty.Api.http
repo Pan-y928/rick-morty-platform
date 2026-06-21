@@ -1,6 +1,28 @@
-@RickMorty.Api_HostAddress = http://localhost:5048
+@RickMorty_Api_HostAddress = http://localhost:5048
 
-GET {{RickMorty.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{RickMorty_Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Morty Smith",
+  "username": "morty",
+  "email": "morty@example.com",
+  "password": "Portal123"
+}
 
 ###
+
+POST {{RickMorty_Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "morty",
+  "password": "Portal123"
+}
+
+### Set the token returned above before calling this request.
+
+@accessToken = replace-with-access-token
+
+GET {{RickMorty_Api_HostAddress}}/api/users/me
+Authorization: Bearer {{accessToken}}

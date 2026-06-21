@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/auth'
+import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
+import { useLogout } from '../features/auth/hooks/useLogout'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-full px-4 py-2 text-sm font-semibold ${
@@ -7,7 +8,8 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
   }`
 
 export function AppLayout() {
-  const { user, logout } = useAuth()
+  const { user } = useCurrentUser()
+  const logout = useLogout()
   const navigate = useNavigate()
 
   const handleLogout = () => {
