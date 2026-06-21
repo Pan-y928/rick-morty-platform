@@ -25,11 +25,11 @@ const statusStyles: Record<CharacterStatus, string> = {
 
 function CharacterListSkeleton() {
   return (
-    <div aria-label="Loading characters" className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div aria-label="Loading characters" className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
       {Array.from({ length: 8 }, (_, index) => (
         <div key={index} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
           <div className="aspect-square animate-pulse bg-white/[0.06]" />
-          <div className="space-y-3 p-5">
+          <div className="space-y-2 p-3 sm:space-y-3 sm:p-5">
             <div className="h-3 w-20 animate-pulse rounded bg-white/10" />
             <div className="h-6 w-3/4 animate-pulse rounded bg-white/10" />
             <div className="h-4 w-1/2 animate-pulse rounded bg-white/10" />
@@ -182,7 +182,7 @@ export function CharactersPage() {
       <form
         key={searchParams.toString()}
         onSubmit={handleFilter}
-        className="mb-8 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:grid-cols-[minmax(0,1fr)_180px_220px_auto]"
+        className="mb-7 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 sm:p-4 md:mb-8 md:grid-cols-[minmax(0,1fr)_180px_220px_auto]"
       >
         <label className="sr-only" htmlFor="character-name">Character name</label>
         <input id="character-name" name="name" defaultValue={name} placeholder="Search by character name..." className="rounded-xl border border-white/10 bg-[#0b1b18] px-4 py-3 text-white placeholder:text-slate-600" />
@@ -234,7 +234,7 @@ export function CharactersPage() {
 
       {data?.results.length ? (
         <>
-          <div className={`grid gap-5 sm:grid-cols-2 lg:grid-cols-4 ${isFetching ? 'opacity-60' : ''}`}>
+          <div className={`grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 ${isFetching ? 'opacity-60' : ''}`}>
             {data.results.map((character) => {
               const isFavorite = favoriteIds.has(character.id)
               const isUpdating =
@@ -244,7 +244,7 @@ export function CharactersPage() {
                   removeFavoriteMutation.variables === character.id)
 
               return (
-                <article key={character.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] hover:-translate-y-1 hover:border-lime-300/40">
+                <article key={character.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.055] to-white/[0.025] hover:-translate-y-1 hover:border-lime-300/40">
                   <Link to={`/characters/${character.id}`} className="block">
                     <div className="relative aspect-square overflow-hidden bg-white/[0.04]">
                       <img
@@ -259,15 +259,15 @@ export function CharactersPage() {
                         }}
                         className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                       />
-                      <div className="absolute left-3 top-3 rounded-full bg-[#071311]/85 px-3 py-1 text-xs font-bold backdrop-blur">#{character.id}</div>
+                      <div className="absolute left-2 top-2 rounded-full bg-[#071311]/85 px-2 py-1 text-[10px] font-bold backdrop-blur sm:left-3 sm:top-3 sm:px-3 sm:text-xs">#{character.id}</div>
                     </div>
-                    <div className="p-5">
-                      <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-300">
+                    <div className="p-3 sm:p-5">
+                      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300 sm:mb-3 sm:gap-2 sm:text-xs sm:tracking-widest">
                         <span className={`h-2 w-2 rounded-full ${statusStyles[character.status]}`} />
                         {character.status}
                       </div>
-                      <h2 className="truncate text-xl font-black text-white group-hover:text-cyan-200">{character.name}</h2>
-                      <p className="mt-2 text-sm text-slate-500">{character.species} · {character.gender}</p>
+                      <h2 className="truncate text-base font-black text-white group-hover:text-cyan-200 sm:text-xl">{character.name}</h2>
+                      <p className="mt-1 truncate text-xs text-slate-500 sm:mt-2 sm:text-sm">{character.species} · {character.gender}</p>
                     </div>
                   </Link>
 
@@ -278,7 +278,7 @@ export function CharactersPage() {
                     title={user ? undefined : 'Log in to save favorites'}
                     disabled={Boolean(user) && (favoritesQuery.isPending || favoritesQuery.isError || isUpdating)}
                     onClick={() => toggleFavorite(character.id)}
-                    className={`absolute right-3 top-3 z-10 grid h-11 w-11 place-items-center rounded-full bg-[#071311]/85 text-2xl shadow-lg backdrop-blur hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50 ${isFavorite ? 'text-red-400' : 'text-white/80 hover:text-red-300'}`}
+                    className={`absolute right-2 top-2 z-10 grid h-9 w-9 place-items-center rounded-full bg-[#071311]/85 text-xl shadow-lg backdrop-blur hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50 sm:right-3 sm:top-3 sm:h-11 sm:w-11 sm:text-2xl ${isFavorite ? 'text-red-400' : 'text-white/80 hover:text-red-300'}`}
                   >
                     <span aria-hidden="true">{isFavorite ? '♥' : '♡'}</span>
                   </button>
@@ -287,16 +287,16 @@ export function CharactersPage() {
             })}
           </div>
 
-          <nav aria-label="Character pagination" aria-busy={isPaginationBusy} className="mt-10 flex flex-col items-center gap-5">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <button type="button" disabled={visiblePage === 1 || isPaginationBusy} onClick={() => changePage(1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">First</button>
-              <button type="button" disabled={!data.info.prev || isPaginationBusy} onClick={() => changePage(visiblePage - 1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Previous</button>
-              <p className="min-w-32 text-center text-sm text-slate-400">Page <strong className="text-white">{visiblePage}</strong> of <strong className="text-white">{data.info.pages}</strong></p>
-              <button type="button" disabled={!data.info.next || isPaginationBusy} onClick={() => changePage(visiblePage + 1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Next</button>
-              <button type="button" disabled={visiblePage === data.info.pages || isPaginationBusy} onClick={() => changePage(data.info.pages)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Last</button>
+          <nav aria-label="Character pagination" aria-busy={isPaginationBusy} className="mt-8 flex flex-col items-center gap-4 sm:mt-10 sm:gap-5">
+            <div className="grid w-full grid-cols-4 items-center gap-2 sm:flex sm:w-auto sm:justify-center sm:gap-3">
+              <button type="button" disabled={visiblePage === 1 || isPaginationBusy} onClick={() => changePage(1)} className="rounded-xl border border-white/10 px-2 py-2.5 text-xs font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30 sm:px-4 sm:text-sm">First</button>
+              <button type="button" disabled={!data.info.prev || isPaginationBusy} onClick={() => changePage(visiblePage - 1)} className="rounded-xl border border-white/10 px-2 py-2.5 text-xs font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30 sm:px-4 sm:text-sm">Previous</button>
+              <p className="order-first col-span-4 mb-1 text-center text-sm text-slate-400 sm:order-none sm:col-auto sm:mb-0 sm:min-w-32">Page <strong className="text-white">{visiblePage}</strong> of <strong className="text-white">{data.info.pages}</strong></p>
+              <button type="button" disabled={!data.info.next || isPaginationBusy} onClick={() => changePage(visiblePage + 1)} className="rounded-xl border border-white/10 px-2 py-2.5 text-xs font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30 sm:px-4 sm:text-sm">Next</button>
+              <button type="button" disabled={visiblePage === data.info.pages || isPaginationBusy} onClick={() => changePage(data.info.pages)} className="rounded-xl border border-white/10 px-2 py-2.5 text-xs font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30 sm:px-4 sm:text-sm">Last</button>
             </div>
 
-            <form onSubmit={handlePageJump} className="flex items-center gap-3">
+            <form onSubmit={handlePageJump} className="flex w-full items-center justify-center gap-2 sm:w-auto sm:gap-3">
               <label htmlFor="page-jump" className="text-sm font-semibold text-slate-400">Go to page</label>
               <input
                 key={visiblePage}

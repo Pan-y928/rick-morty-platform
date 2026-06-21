@@ -46,9 +46,9 @@ export function LoginPage() {
   }
 
   return (
-    <div>
-      <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Welcome back</p>
-      <h1 className="mt-3 text-4xl font-black text-white">Enter the portal</h1>
+    <div className="rounded-3xl border border-cyan-300/10 bg-white/[0.035] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm sm:p-8 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+      <p className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-300 sm:text-sm">Welcome back</p>
+      <h1 className="mt-3 text-3xl font-black text-white sm:text-4xl">Enter the portal</h1>
       <p className="mt-3 text-slate-400">Sign in to open character files and manage favorites.</p>
 
       {loginMutation.error ? (
@@ -57,7 +57,7 @@ export function LoginPage() {
         </div>
       ) : null}
 
-      <form onSubmit={onSubmit} className="mt-9 space-y-5" noValidate>
+      <form onSubmit={onSubmit} className="mt-7 space-y-4 sm:mt-9 sm:space-y-5" noValidate>
         <label className="block text-sm font-semibold text-slate-200">
           Username
           <input

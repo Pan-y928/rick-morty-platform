@@ -66,9 +66,9 @@ export function RegistrationPage() {
   }
 
   return (
-    <div>
-      <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">New traveller</p>
-      <h1 className="mt-3 text-4xl font-black text-white">Create an account</h1>
+    <div className="rounded-3xl border border-cyan-300/10 bg-white/[0.035] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm sm:p-8 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+      <p className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-300 sm:text-sm">New traveller</p>
+      <h1 className="mt-3 text-3xl font-black text-white sm:text-4xl">Create an account</h1>
       <p className="mt-3 text-slate-400">Register to save characters across dimensions.</p>
 
       {registerMutation.error ? (
@@ -77,7 +77,7 @@ export function RegistrationPage() {
         </div>
       ) : null}
 
-      <form onSubmit={onSubmit} className="mt-8 grid gap-4" noValidate>
+      <form onSubmit={onSubmit} className="mt-6 grid gap-3 sm:mt-8 sm:gap-4" noValidate>
         <label className="block text-sm font-semibold text-slate-200">
           Name
           <input {...register('name')} autoComplete="name" aria-invalid={Boolean(errors.name)} className={fieldClass} />
