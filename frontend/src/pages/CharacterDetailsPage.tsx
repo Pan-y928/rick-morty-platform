@@ -1,9 +1,12 @@
-import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { PageIntro } from '../components/PageIntro'
+import { getApiErrorMessage } from '../features/auth/api/getApiErrorMessage'
 import { useCharacter } from '../features/characters/hooks/useCharacter'
 import { useEpisodes } from '../features/characters/hooks/useEpisodes'
 import type { CharacterStatus } from '../features/characters/types/character'
+import { useAddFavorite } from '../features/favorites/hooks/useAddFavorite'
+import { useFavorites } from '../features/favorites/hooks/useFavorites'
+import { useRemoveFavorite } from '../features/favorites/hooks/useRemoveFavorite'
 
 const statusStyles: Record<CharacterStatus, string> = {
   Alive: 'bg-lime-300 text-[#071311]',
@@ -28,9 +31,33 @@ export function CharacterDetailsPage() {
   const { id: idParam } = useParams()
   const parsedId = Number(idParam)
   const characterId = Number.isInteger(parsedId) && parsedId > 0 ? parsedId : null
-  const [isFavorite, setIsFavorite] = useState(false)
   const characterQuery = useCharacter(characterId)
   const episodesQuery = useEpisodes(characterQuery.data?.episode ?? [])
+  const favoritesQuery = useFavorites()
+  const addFavoriteMutation = useAddFavorite()
+  const removeFavoriteMutation = useRemoveFavorite()
+  const isFavorite = Boolean(
+    characterId &&
+      favoritesQuery.data?.some(
+        (favorite) => favorite.characterId === characterId,
+      ),
+  )
+  const isUpdatingFavorite =
+    addFavoriteMutation.isPending || removeFavoriteMutation.isPending
+  const favoriteError =
+    addFavoriteMutation.error ??
+    removeFavoriteMutation.error ??
+    favoritesQuery.error
+
+  const toggleFavorite = () => {
+    if (!characterId) return
+
+    addFavoriteMutation.reset()
+    removeFavoriteMutation.reset()
+
+    if (isFavorite) removeFavoriteMutation.mutate(characterId)
+    else addFavoriteMutation.mutate(characterId)
+  }
 
   if (characterId === null || characterQuery.isError) {
     return (
@@ -66,18 +93,36 @@ export function CharacterDetailsPage() {
         title={character.name}
         description={`${character.species} from ${character.origin.name}. Last seen at ${character.location.name}.`}
         action={
-          <button
-            type="button"
-            aria-pressed={isFavorite}
-            onClick={() => setIsFavorite((current) => !current)}
-            className={`rounded-xl px-5 py-3 font-black ${
-              isFavorite
-                ? 'border border-lime-300/40 bg-lime-300/10 text-lime-200'
-                : 'bg-lime-300 text-[#071311] hover:bg-lime-200'
-            }`}
-          >
-            {isFavorite ? 'Saved to favorites' : 'Add to favorites'}
-          </button>
+          <div className="text-right">
+            <button
+              type="button"
+              aria-pressed={isFavorite}
+              disabled={
+                favoritesQuery.isPending ||
+                favoritesQuery.isError ||
+                isUpdatingFavorite
+              }
+              onClick={toggleFavorite}
+              className={`rounded-xl px-5 py-3 font-black disabled:cursor-not-allowed disabled:opacity-50 ${
+                isFavorite
+                  ? 'border border-lime-300/40 bg-lime-300/10 text-lime-200'
+                  : 'bg-lime-300 text-[#071311] hover:bg-lime-200'
+              }`}
+            >
+              {favoritesQuery.isPending
+                ? 'Checking favorites…'
+                : isUpdatingFavorite
+                  ? 'Saving…'
+                  : isFavorite
+                    ? 'Saved to favorites'
+                    : 'Add to favorites'}
+            </button>
+            {favoriteError ? (
+              <p role="alert" className="mt-2 max-w-xs text-xs text-red-300">
+                {getApiErrorMessage(favoriteError)}
+              </p>
+            ) : null}
+          </div>
         }
       />
 

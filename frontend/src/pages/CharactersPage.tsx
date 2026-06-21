@@ -1,8 +1,18 @@
 import { type FormEvent } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom'
 import { PageIntro } from '../components/PageIntro'
+import { getApiErrorMessage } from '../features/auth/api/getApiErrorMessage'
+import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
 import { useCharacters } from '../features/characters/hooks/useCharacters'
 import type { CharacterStatus } from '../features/characters/types/character'
+import { useAddFavorite } from '../features/favorites/hooks/useAddFavorite'
+import { useFavorites } from '../features/favorites/hooks/useFavorites'
+import { useRemoveFavorite } from '../features/favorites/hooks/useRemoveFavorite'
 
 const statusStyles: Record<CharacterStatus, string> = {
   Alive: 'bg-lime-300',
@@ -28,7 +38,20 @@ function CharacterListSkeleton() {
 }
 
 export function CharactersPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { user } = useCurrentUser()
+  const favoritesQuery = useFavorites(Boolean(user))
+  const addFavoriteMutation = useAddFavorite()
+  const removeFavoriteMutation = useRemoveFavorite()
+  const favoriteIds = new Set(
+    favoritesQuery.data?.map((favorite) => favorite.characterId),
+  )
+  const favoriteError =
+    addFavoriteMutation.error ??
+    removeFavoriteMutation.error ??
+    favoritesQuery.error
   const parsedPage = Number(searchParams.get('page') ?? '1')
   const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1
   const name = searchParams.get('name')?.trim() ?? ''
@@ -65,6 +88,22 @@ export function CharactersPage() {
 
   const clearFilters = () => setSearchParams({})
 
+  const toggleFavorite = (characterId: number) => {
+    if (!user) {
+      navigate('/', { state: { from: location } })
+      return
+    }
+
+    addFavoriteMutation.reset()
+    removeFavoriteMutation.reset()
+
+    if (favoriteIds.has(characterId)) {
+      removeFavoriteMutation.mutate(characterId)
+    } else {
+      addFavoriteMutation.mutate(characterId)
+    }
+  }
+
   return (
     <>
       <PageIntro
@@ -86,21 +125,10 @@ export function CharactersPage() {
         className="mb-8 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:grid-cols-[minmax(0,1fr)_180px_220px_auto]"
       >
         <label className="sr-only" htmlFor="character-name">Character name</label>
-        <input
-          id="character-name"
-          name="name"
-          defaultValue={name}
-          placeholder="Search by character name..."
-          className="rounded-xl border border-white/10 bg-[#0b1b18] px-4 py-3 text-white placeholder:text-slate-600"
-        />
+        <input id="character-name" name="name" defaultValue={name} placeholder="Search by character name..." className="rounded-xl border border-white/10 bg-[#0b1b18] px-4 py-3 text-white placeholder:text-slate-600" />
 
         <label className="sr-only" htmlFor="character-status">Status</label>
-        <select
-          id="character-status"
-          name="status"
-          defaultValue={status}
-          className="rounded-xl border border-white/10 bg-[#0b1b18] px-4 py-3 text-white"
-        >
+        <select id="character-status" name="status" defaultValue={status} className="rounded-xl border border-white/10 bg-[#0b1b18] px-4 py-3 text-white">
           <option value="">Any status</option>
           <option value="alive">Alive</option>
           <option value="dead">Dead</option>
@@ -108,21 +136,16 @@ export function CharactersPage() {
         </select>
 
         <label className="sr-only" htmlFor="character-species">Species</label>
-        <input
-          id="character-species"
-          name="species"
-          defaultValue={species}
-          placeholder="Filter by species..."
-          className="rounded-xl border border-white/10 bg-[#0b1b18] px-4 py-3 text-white placeholder:text-slate-600"
-        />
+        <input id="character-species" name="species" defaultValue={species} placeholder="Filter by species..." className="rounded-xl border border-white/10 bg-[#0b1b18] px-4 py-3 text-white placeholder:text-slate-600" />
 
-        <button
-          type="submit"
-          className="rounded-xl bg-lime-300 px-6 py-3 font-black text-[#071311] hover:bg-lime-200"
-        >
-          Search
-        </button>
+        <button type="submit" className="rounded-xl bg-lime-300 px-6 py-3 font-black text-[#071311] hover:bg-lime-200">Search</button>
       </form>
+
+      {user && favoriteError ? (
+        <div role="alert" className="mb-6 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+          {getApiErrorMessage(favoriteError)}
+        </div>
+      ) : null}
 
       {isPending ? <CharacterListSkeleton /> : null}
 
@@ -146,57 +169,51 @@ export function CharactersPage() {
       {data?.results.length ? (
         <>
           <div className={`grid gap-5 sm:grid-cols-2 lg:grid-cols-4 ${isFetching ? 'opacity-60' : ''}`}>
-            {data.results.map((character) => (
-              <Link
-                key={character.id}
-                to={`/characters/${character.id}`}
-                className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] hover:-translate-y-1 hover:border-lime-300/40"
-              >
-                <div className="relative aspect-square overflow-hidden bg-white/[0.04]">
-                  <img
-                    src={character.image}
-                    alt={character.name}
-                    loading="lazy"
-                    width="300"
-                    height="300"
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute right-3 top-3 rounded-full bg-[#071311]/85 px-3 py-1 text-xs font-bold backdrop-blur">
-                    #{character.id}
-                  </div>
-                </div>
-                <div className="p-5">
-                  <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-300">
-                    <span className={`h-2 w-2 rounded-full ${statusStyles[character.status]}`} />
-                    {character.status}
-                  </div>
-                  <h2 className="truncate text-xl font-black text-white group-hover:text-cyan-200">{character.name}</h2>
-                  <p className="mt-2 text-sm text-slate-500">{character.species} · {character.gender}</p>
-                </div>
-              </Link>
-            ))}
+            {data.results.map((character) => {
+              const isFavorite = favoriteIds.has(character.id)
+              const isUpdating =
+                (addFavoriteMutation.isPending &&
+                  addFavoriteMutation.variables === character.id) ||
+                (removeFavoriteMutation.isPending &&
+                  removeFavoriteMutation.variables === character.id)
+
+              return (
+                <article key={character.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] hover:-translate-y-1 hover:border-lime-300/40">
+                  <Link to={`/characters/${character.id}`} className="block">
+                    <div className="relative aspect-square overflow-hidden bg-white/[0.04]">
+                      <img src={character.image} alt={character.name} loading="lazy" width="300" height="300" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                      <div className="absolute left-3 top-3 rounded-full bg-[#071311]/85 px-3 py-1 text-xs font-bold backdrop-blur">#{character.id}</div>
+                    </div>
+                    <div className="p-5">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-300">
+                        <span className={`h-2 w-2 rounded-full ${statusStyles[character.status]}`} />
+                        {character.status}
+                      </div>
+                      <h2 className="truncate text-xl font-black text-white group-hover:text-cyan-200">{character.name}</h2>
+                      <p className="mt-2 text-sm text-slate-500">{character.species} · {character.gender}</p>
+                    </div>
+                  </Link>
+
+                  <button
+                    type="button"
+                    aria-label={isFavorite ? `Remove ${character.name} from favorites` : `Add ${character.name} to favorites`}
+                    aria-pressed={isFavorite}
+                    title={user ? undefined : 'Log in to save favorites'}
+                    disabled={Boolean(user) && (favoritesQuery.isPending || favoritesQuery.isError || isUpdating)}
+                    onClick={() => toggleFavorite(character.id)}
+                    className={`absolute right-3 top-3 z-10 grid h-11 w-11 place-items-center rounded-full bg-[#071311]/85 text-2xl shadow-lg backdrop-blur hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50 ${isFavorite ? 'text-red-400' : 'text-white/80 hover:text-red-300'}`}
+                  >
+                    <span aria-hidden="true">{isFavorite ? '♥' : '♡'}</span>
+                  </button>
+                </article>
+              )
+            })}
           </div>
 
           <nav aria-label="Character pagination" className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <button
-              type="button"
-              disabled={!data.info.prev || isFetching}
-              onClick={() => changePage(page - 1)}
-              className="rounded-xl border border-white/10 px-5 py-2.5 font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              Previous
-            </button>
-            <p className="min-w-32 text-center text-sm text-slate-400">
-              Page <strong className="text-white">{page}</strong> of <strong className="text-white">{data.info.pages}</strong>
-            </p>
-            <button
-              type="button"
-              disabled={!data.info.next || isFetching}
-              onClick={() => changePage(page + 1)}
-              className="rounded-xl border border-white/10 px-5 py-2.5 font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              Next
-            </button>
+            <button type="button" disabled={!data.info.prev || isFetching} onClick={() => changePage(page - 1)} className="rounded-xl border border-white/10 px-5 py-2.5 font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Previous</button>
+            <p className="min-w-32 text-center text-sm text-slate-400">Page <strong className="text-white">{page}</strong> of <strong className="text-white">{data.info.pages}</strong></p>
+            <button type="button" disabled={!data.info.next || isFetching} onClick={() => changePage(page + 1)} className="rounded-xl border border-white/10 px-5 py-2.5 font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Next</button>
           </nav>
         </>
       ) : null}
