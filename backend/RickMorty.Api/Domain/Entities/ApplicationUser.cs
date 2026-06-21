@@ -7,4 +7,6 @@ public sealed class ApplicationUser : IdentityUser<Guid>
     public required string Name { get; set; }
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public ICollection<FavoriteCharacter> FavoriteCharacters { get; set; } = [];
 }
