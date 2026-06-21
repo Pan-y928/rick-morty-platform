@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: rick-morty-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=rickmorty.db
+      - key: Jwt__Issuer
+        value: RickMorty.Api
+      - key: Jwt__Audience
+        value: RickMorty.Web
+      - key: Jwt__ExpirationMinutes
+        value: 60
+      - key: Jwt__Key
+        generateValue: true
+      - key: FrontendOrigin
+        sync: false

@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/.vs/
+RickMorty.Api.Tests/
+*.db
+*.db-shm
+*.db-wal
+*.user
+*.suo
