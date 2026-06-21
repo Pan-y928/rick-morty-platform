@@ -1,10 +1,12 @@
 import axios from 'axios'
 import type {
+  Character,
   CharacterFilters,
   CharactersResponse,
+  Episode,
 } from '../types/character'
 
-const charactersClient = axios.create({
+const rickMortyClient = axios.create({
   baseURL: 'https://rickandmortyapi.com/api',
   timeout: 10_000,
 })
@@ -16,7 +18,7 @@ const emptyResponse: CharactersResponse = {
 
 export async function getCharacters(filters: CharacterFilters) {
   try {
-    const { data } = await charactersClient.get<CharactersResponse>('/character', {
+    const { data } = await rickMortyClient.get<CharactersResponse>('/character', {
       params: filters,
     })
 
@@ -29,4 +31,19 @@ export async function getCharacters(filters: CharacterFilters) {
 
     throw error
   }
+}
+
+export async function getCharacter(id: number) {
+  const { data } = await rickMortyClient.get<Character>(`/character/${id}`)
+  return data
+}
+
+export async function getEpisodes(ids: number[]) {
+  if (ids.length === 0) return []
+
+  const { data } = await rickMortyClient.get<Episode | Episode[]>(
+    `/episode/${ids.join(',')}`,
+  )
+
+  return Array.isArray(data) ? data : [data]
 }
