@@ -16,10 +16,14 @@ const emptyResponse: CharactersResponse = {
   results: [],
 }
 
-export async function getCharacters(filters: CharacterFilters) {
+export async function getCharacters(
+  filters: CharacterFilters,
+  signal?: AbortSignal,
+) {
   try {
     const { data } = await rickMortyClient.get<CharactersResponse>('/character', {
       params: filters,
+      signal,
     })
 
     return data

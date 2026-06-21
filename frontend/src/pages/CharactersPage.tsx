@@ -1,4 +1,4 @@
-import { type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import {
   Link,
   useLocation,
@@ -9,7 +9,10 @@ import { PageIntro } from '../components/PageIntro'
 import { getApiErrorMessage } from '../features/auth/api/getApiErrorMessage'
 import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
 import { useCharacters } from '../features/characters/hooks/useCharacters'
-import type { CharacterStatus } from '../features/characters/types/character'
+import type {
+  CharacterStatus,
+  CharactersResponse,
+} from '../features/characters/types/character'
 import { useAddFavorite } from '../features/favorites/hooks/useAddFavorite'
 import { useFavorites } from '../features/favorites/hooks/useFavorites'
 import { useRemoveFavorite } from '../features/favorites/hooks/useRemoveFavorite'
@@ -38,6 +41,12 @@ function CharacterListSkeleton() {
 }
 
 export function CharactersPage() {
+  const pageNavigationLock = useRef(false)
+  const [lastSuccessfulPage, setLastSuccessfulPage] = useState<{
+    data: CharactersResponse
+    page: number
+  } | null>(null)
+  const [isPageNavigationLocked, setIsPageNavigationLocked] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -58,12 +67,43 @@ export function CharactersPage() {
   const status = searchParams.get('status') ?? ''
   const species = searchParams.get('species')?.trim() ?? ''
 
-  const { data, isError, isFetching, isPending, refetch } = useCharacters({
+  const {
+    data: requestedData,
+    isError,
+    isFetching,
+    isPending,
+    refetch,
+  } = useCharacters({
     page,
     name: name || undefined,
     status: status || undefined,
     species: species || undefined,
   })
+
+  if (
+    requestedData &&
+    !isFetching &&
+    !isError &&
+    (lastSuccessfulPage?.page !== page ||
+      lastSuccessfulPage.data !== requestedData)
+  ) {
+    setLastSuccessfulPage({ data: requestedData, page })
+  }
+
+  const data = requestedData ?? lastSuccessfulPage?.data
+  const visiblePage = isError ? (lastSuccessfulPage?.page ?? page) : page
+  const isPaginationBusy = isFetching || isPageNavigationLocked
+
+  useEffect(() => {
+    if (isFetching || !pageNavigationLock.current) return
+
+    const frameId = window.requestAnimationFrame(() => {
+      pageNavigationLock.current = false
+      setIsPageNavigationLocked(false)
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [isFetching, page, requestedData])
 
   const handleFilter = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -79,11 +119,31 @@ export function CharactersPage() {
   }
 
   const changePage = (nextPage: number) => {
+    if (pageNavigationLock.current || isFetching || !data?.info.pages) return
+
+    const targetPage = Math.min(Math.max(nextPage, 1), data.info.pages)
+    if (targetPage === page && !isError) return
+
+    pageNavigationLock.current = true
+    setIsPageNavigationLocked(true)
+
+    if (targetPage === page) {
+      void refetch()
+      return
+    }
+
     const nextParams = new URLSearchParams(searchParams)
-    if (nextPage === 1) nextParams.delete('page')
-    else nextParams.set('page', String(nextPage))
+    if (targetPage === 1) nextParams.delete('page')
+    else nextParams.set('page', String(targetPage))
     setSearchParams(nextParams)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handlePageJump = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const value = Number(new FormData(event.currentTarget).get('page'))
+
+    if (Number.isInteger(value)) changePage(value)
   }
 
   const clearFilters = () => setSearchParams({})
@@ -149,7 +209,13 @@ export function CharactersPage() {
 
       {isPending ? <CharacterListSkeleton /> : null}
 
-      {isError ? (
+      {isError && lastSuccessfulPage ? (
+        <div role="status" className="mb-6 rounded-xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-100">
+          Page {page} could not be loaded. Still showing page {lastSuccessfulPage.page}; use Next to retry.
+        </div>
+      ) : null}
+
+      {isError && !lastSuccessfulPage ? (
         <div role="alert" className="rounded-2xl border border-red-400/20 bg-red-400/5 px-6 py-16 text-center">
           <h2 className="text-xl font-black text-white">The portal is unstable</h2>
           <p className="mt-2 text-slate-400">Characters could not be loaded. Check your connection and try again.</p>
@@ -181,7 +247,18 @@ export function CharactersPage() {
                 <article key={character.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] hover:-translate-y-1 hover:border-lime-300/40">
                   <Link to={`/characters/${character.id}`} className="block">
                     <div className="relative aspect-square overflow-hidden bg-white/[0.04]">
-                      <img src={character.image} alt={character.name} loading="lazy" width="300" height="300" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                      <img
+                        src={character.image}
+                        alt={character.name}
+                        loading="lazy"
+                        width="300"
+                        height="300"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null
+                          event.currentTarget.src = '/rick-morty-logo.png'
+                        }}
+                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                      />
                       <div className="absolute left-3 top-3 rounded-full bg-[#071311]/85 px-3 py-1 text-xs font-bold backdrop-blur">#{character.id}</div>
                     </div>
                     <div className="p-5">
@@ -210,10 +287,35 @@ export function CharactersPage() {
             })}
           </div>
 
-          <nav aria-label="Character pagination" className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <button type="button" disabled={!data.info.prev || isFetching} onClick={() => changePage(page - 1)} className="rounded-xl border border-white/10 px-5 py-2.5 font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Previous</button>
-            <p className="min-w-32 text-center text-sm text-slate-400">Page <strong className="text-white">{page}</strong> of <strong className="text-white">{data.info.pages}</strong></p>
-            <button type="button" disabled={!data.info.next || isFetching} onClick={() => changePage(page + 1)} className="rounded-xl border border-white/10 px-5 py-2.5 font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Next</button>
+          <nav aria-label="Character pagination" aria-busy={isPaginationBusy} className="mt-10 flex flex-col items-center gap-5">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button type="button" disabled={visiblePage === 1 || isPaginationBusy} onClick={() => changePage(1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">First</button>
+              <button type="button" disabled={!data.info.prev || isPaginationBusy} onClick={() => changePage(visiblePage - 1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Previous</button>
+              <p className="min-w-32 text-center text-sm text-slate-400">Page <strong className="text-white">{visiblePage}</strong> of <strong className="text-white">{data.info.pages}</strong></p>
+              <button type="button" disabled={!data.info.next || isPaginationBusy} onClick={() => changePage(visiblePage + 1)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Next</button>
+              <button type="button" disabled={visiblePage === data.info.pages || isPaginationBusy} onClick={() => changePage(data.info.pages)} className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 hover:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-30">Last</button>
+            </div>
+
+            <form onSubmit={handlePageJump} className="flex items-center gap-3">
+              <label htmlFor="page-jump" className="text-sm font-semibold text-slate-400">Go to page</label>
+              <input
+                key={visiblePage}
+                id="page-jump"
+                name="page"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max={data.info.pages}
+                defaultValue={visiblePage}
+                disabled={isPaginationBusy}
+                className="w-20 rounded-xl border border-white/10 bg-[#0b1b18] px-3 py-2.5 text-center text-white"
+              />
+              <button type="submit" disabled={isPaginationBusy} className="rounded-xl bg-cyan-300 px-4 py-2.5 text-sm font-black text-[#071311] hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-50">Go</button>
+            </form>
+
+            <p aria-live="polite" className="h-5 text-xs font-semibold text-cyan-200">
+              {isPaginationBusy ? 'Loading page…' : ''}
+            </p>
           </nav>
         </>
       ) : null}

@@ -2,13 +2,15 @@ import { createBrowserRouter } from 'react-router-dom'
 import { ProtectedRoute } from '../auth/ProtectedRoute'
 import { AppLayout } from '../layouts/AppLayout'
 import { AuthLayout } from '../layouts/AuthLayout'
-import { CharacterDetailsPage } from '../pages/CharacterDetailsPage'
-import { CharactersPage } from '../pages/CharactersPage'
-import { FavoritesPage } from '../pages/FavoritesPage'
-import { LoginPage } from '../pages/LoginPage'
-import { NotFoundPage } from '../pages/NotFoundPage'
-import { ProfilePage } from '../pages/ProfilePage'
-import { RegistrationPage } from '../pages/RegistrationPage'
+import {
+  CharacterDetailsPage,
+  CharactersPage,
+  FavoritesPage,
+  LoginPage,
+  NotFoundPage,
+  ProfilePage,
+  RegistrationPage,
+} from './lazyPages'
 
 export const router = createBrowserRouter([
   {
