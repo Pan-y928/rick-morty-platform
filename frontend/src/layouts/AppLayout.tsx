@@ -18,10 +18,10 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#071311] text-slate-100">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-[#071311]/90 backdrop-blur-xl">
+    <div className="portal-shell min-h-screen bg-[#071311]/75 text-slate-100">
+      <header className="sticky top-0 z-20 border-b border-lime-300/15 bg-[#071311]/85 shadow-[0_8px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
-          <NavLink to="/characters" className="self-center text-sm font-black tracking-[0.22em] text-lime-300 sm:self-auto sm:text-base">
+          <NavLink to="/characters" className="brand-font self-center text-sm tracking-[0.08em] text-lime-300 drop-shadow-[0_0_12px_rgba(168,255,53,0.45)] sm:self-auto sm:text-base">
             RICKVERSE
           </NavLink>
           <nav aria-label="Main navigation" className="grid w-full grid-cols-4 items-center gap-1 sm:flex sm:w-auto">

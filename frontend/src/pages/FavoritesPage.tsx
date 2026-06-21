@@ -87,7 +87,7 @@ export function FavoritesPage() {
               removeMutation.variables === character.id
 
             return (
-              <article key={character.id} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+              <article key={character.id} className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.055] to-white/[0.025] hover:-translate-y-1 hover:border-cyan-300/35">
                 <Link to={`/characters/${character.id}`} className="group block">
                   <div className="aspect-square overflow-hidden">
                     <img src={character.image} alt={character.name} loading="lazy" width="300" height="300" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />

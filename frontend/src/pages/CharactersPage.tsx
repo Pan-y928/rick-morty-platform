@@ -244,7 +244,7 @@ export function CharactersPage() {
                   removeFavoriteMutation.variables === character.id)
 
               return (
-                <article key={character.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] hover:-translate-y-1 hover:border-lime-300/40">
+                <article key={character.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.055] to-white/[0.025] hover:-translate-y-1 hover:border-lime-300/40">
                   <Link to={`/characters/${character.id}`} className="block">
                     <div className="relative aspect-square overflow-hidden bg-white/[0.04]">
                       <img
