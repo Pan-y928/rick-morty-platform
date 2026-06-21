@@ -7,11 +7,11 @@ import { useRemoveFavorite } from '../features/favorites/hooks/useRemoveFavorite
 
 function FavoritesSkeleton() {
   return (
-    <div aria-label="Loading favorites" className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div aria-label="Loading favorites" className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
       {Array.from({ length: 4 }, (_, index) => (
         <div key={index} className="overflow-hidden rounded-2xl border border-white/10">
           <div className="aspect-square animate-pulse bg-white/[0.06]" />
-          <div className="space-y-3 p-5">
+          <div className="space-y-2 p-3 sm:space-y-3 sm:p-5">
             <div className="h-6 w-3/4 animate-pulse rounded bg-white/10" />
             <div className="h-4 w-1/2 animate-pulse rounded bg-white/10" />
           </div>
@@ -77,7 +77,7 @@ export function FavoritesPage() {
       ) : null}
 
       {charactersQuery.data ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {favoritesQuery.data.map((favorite) => {
             const character = charactersById.get(favorite.characterId)
             if (!character) return null
@@ -92,17 +92,17 @@ export function FavoritesPage() {
                   <div className="aspect-square overflow-hidden">
                     <img src={character.image} alt={character.name} loading="lazy" width="300" height="300" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
                   </div>
-                  <div className="px-5 pt-5">
-                    <h2 className="truncate text-xl font-black text-white group-hover:text-cyan-200">{character.name}</h2>
-                    <p className="mt-2 text-sm text-slate-500">{character.species} · {character.status}</p>
+                  <div className="px-3 pt-3 sm:px-5 sm:pt-5">
+                    <h2 className="truncate text-base font-black text-white group-hover:text-cyan-200 sm:text-xl">{character.name}</h2>
+                    <p className="mt-1 truncate text-xs text-slate-500 sm:mt-2 sm:text-sm">{character.species} · {character.status}</p>
                   </div>
                 </Link>
-                <div className="p-5">
+                <div className="p-3 sm:p-5">
                   <button
                     type="button"
                     disabled={isRemoving}
                     onClick={() => removeMutation.mutate(character.id)}
-                    className="w-full rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-300 hover:border-red-300/40 hover:text-red-200 disabled:opacity-50"
+                    className="w-full rounded-xl border border-white/10 px-2 py-2.5 text-xs font-bold text-slate-300 hover:border-red-300/40 hover:text-red-200 disabled:opacity-50 sm:px-4 sm:text-sm"
                   >
                     {isRemoving ? 'Removing…' : 'Remove favorite'}
                   </button>

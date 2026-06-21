@@ -16,7 +16,7 @@ const statusStyles: Record<CharacterStatus, string> = {
 
 function DetailSkeleton() {
   return (
-    <div aria-label="Loading character" className="grid animate-pulse gap-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 md:grid-cols-[360px_1fr]">
+    <div aria-label="Loading character" className="grid animate-pulse gap-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:gap-8 sm:rounded-3xl sm:p-6 md:grid-cols-[360px_1fr]">
       <div className="aspect-square rounded-2xl bg-white/[0.06]" />
       <div className="grid content-start gap-5 sm:grid-cols-2">
         {Array.from({ length: 6 }, (_, index) => (
@@ -93,7 +93,7 @@ export function CharacterDetailsPage() {
         title={character.name}
         description={`${character.species} from ${character.origin.name}. Last seen at ${character.location.name}.`}
         action={
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <button
               type="button"
               aria-pressed={isFavorite}
@@ -103,7 +103,7 @@ export function CharacterDetailsPage() {
                 isUpdatingFavorite
               }
               onClick={toggleFavorite}
-              className={`rounded-xl px-5 py-3 font-black disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`w-full rounded-xl px-5 py-3 font-black disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto ${
                 isFavorite
                   ? 'border border-lime-300/40 bg-lime-300/10 text-lime-200'
                   : 'bg-lime-300 text-[#071311] hover:bg-lime-200'
@@ -126,7 +126,7 @@ export function CharacterDetailsPage() {
         }
       />
 
-      <section aria-labelledby="character-information" className="grid gap-8 rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-7 md:grid-cols-[360px_1fr]">
+      <section aria-labelledby="character-information" className="grid gap-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:gap-8 sm:rounded-3xl sm:p-7 md:grid-cols-[360px_1fr]">
         <div>
           <div className="relative overflow-hidden rounded-2xl">
             <img src={character.image} alt={character.name} width="360" height="360" className="aspect-square h-full w-full object-cover" />
@@ -137,8 +137,8 @@ export function CharacterDetailsPage() {
         </div>
 
         <div>
-          <h2 id="character-information" className="text-2xl font-black text-white">Character information</h2>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <h2 id="character-information" className="text-xl font-black text-white sm:text-2xl">Character information</h2>
+          <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-2 sm:gap-4">
             {details.map(([label, value]) => (
               <div key={label} className="rounded-xl border border-white/10 bg-black/10 p-4">
                 <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{label}</p>
@@ -174,7 +174,7 @@ export function CharacterDetailsPage() {
         {episodesQuery.data ? (
           <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {episodesQuery.data.map((episode) => (
-              <li key={episode.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-5 hover:border-cyan-300/30">
+              <li key={episode.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-4 hover:border-cyan-300/30 sm:p-5">
                 <div className="flex items-center justify-between gap-3">
                   <span className="rounded-md bg-cyan-300/10 px-2 py-1 text-xs font-black tracking-wider text-cyan-200">{episode.episode}</span>
                   <span className="text-xs text-slate-600">#{episode.id}</span>

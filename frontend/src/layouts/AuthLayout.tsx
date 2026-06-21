@@ -22,9 +22,9 @@ export function AuthLayout() {
         </div>
         <p className="text-sm text-slate-600">C-137 secure access terminal</p>
       </section>
-      <section className="relative flex min-h-screen items-center justify-center px-6 py-12">
+      <section className="relative flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
         <div className="w-full max-w-md">
-          <Link to="/characters" className="mb-10 inline-block font-black tracking-[0.22em] text-lime-300 lg:hidden">
+          <Link to="/characters" className="mb-8 inline-block text-sm font-black tracking-[0.22em] text-lime-300 sm:mb-10 sm:text-base lg:hidden">
             RICKVERSE
           </Link>
           <Outlet />

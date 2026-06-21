@@ -24,7 +24,8 @@ body {
 
 button,
 a,
-input {
+input,
+select {
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -36,7 +37,8 @@ a {
 
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--portal-blue);
   outline-offset: 3px;
 }

@@ -3,7 +3,7 @@ import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
 import { useLogout } from '../features/auth/hooks/useLogout'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `rounded-full px-4 py-2 text-sm font-semibold ${
+  `rounded-full px-1 py-2 text-center text-[11px] font-semibold sm:px-4 sm:text-sm ${
     isActive ? 'bg-lime-300 text-[#071311]' : 'text-slate-300 hover:bg-white/5 hover:text-white'
   }`
 
@@ -20,27 +20,27 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-[#071311] text-slate-100">
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#071311]/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <NavLink to="/characters" className="font-black tracking-[0.22em] text-lime-300">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-4">
+          <NavLink to="/characters" className="self-center text-sm font-black tracking-[0.22em] text-lime-300 sm:self-auto sm:text-base">
             RICKVERSE
           </NavLink>
-          <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-1">
+          <nav aria-label="Main navigation" className="grid w-full grid-cols-4 items-center gap-1 sm:flex sm:w-auto">
             <NavLink to="/characters" className={linkClass}>Characters</NavLink>
             <NavLink to="/user/characters" className={linkClass}>Favorites</NavLink>
             <NavLink to="/user/profile" className={linkClass}>Profile</NavLink>
             {user ? (
-              <button type="button" onClick={handleLogout} className="ml-2 rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-slate-300 hover:border-red-300/50 hover:text-red-200">
+              <button type="button" onClick={handleLogout} className="rounded-full border border-white/15 px-1 py-2 text-[11px] font-semibold text-slate-300 hover:border-red-300/50 hover:text-red-200 sm:ml-2 sm:px-4 sm:text-sm">
                 Log out
               </button>
             ) : (
-              <NavLink to="/" className="ml-2 rounded-full border border-white/15 px-4 py-2 text-sm font-semibold hover:border-lime-300/50 hover:text-lime-300">
+              <NavLink to="/" className="rounded-full border border-white/15 px-1 py-2 text-center text-[11px] font-semibold hover:border-lime-300/50 hover:text-lime-300 sm:ml-2 sm:px-4 sm:text-sm">
                 Log in
               </NavLink>
             )}
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-7 sm:px-8 sm:py-10">
         <Outlet />
       </main>
     </div>
