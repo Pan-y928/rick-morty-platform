@@ -1,73 +1,119 @@
-# React + TypeScript + Vite
+# Rickverse Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The Rickverse frontend is a React and TypeScript single-page application. It provides public character discovery and authenticated profile and favorites workflows.
 
-Currently, two official plugins are available:
+- Live application: [https://rick-morty-platform-chi.vercel.app](https://rick-morty-platform-chi.vercel.app)
+- Full project guide: [../README.md](../README.md)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- React 19 and TypeScript
+- Vite 8
+- Tailwind CSS 4
+- React Router 7
+- TanStack Query 5
+- React Hook Form and Zod
+- Axios
+- Vitest, jsdom, and React Testing Library
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Feature structure
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+src/
+├── app/             Router and lazy page imports
+├── auth/            Session management and route protection
+├── components/      Shared presentation components
+├── features/
+│   ├── auth/        Authentication API, hooks, and types
+│   ├── characters/  Character API, query hooks, and types
+│   └── favorites/   Favorites API, mutation hooks, and types
+├── layouts/         Public/authenticated application shells
+├── lib/             Axios client and token storage
+├── pages/           Route-level pages
+└── test/            Shared test setup
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+API access and server state are exposed through feature hooks. Route-level modules are lazy-loaded to reduce the initial JavaScript payload. TanStack Query handles caching, request cancellation, retry behavior, and cache invalidation after favorite mutations.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Local setup
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
+
+- Node.js 22 or later
+- pnpm 11 or later
+- The backend running at `http://localhost:5048`
+
+Install dependencies and create the environment file:
+
+```bash
+cd frontend
+pnpm install
+cp .env.example .env
+pnpm dev
+```
+
+For Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+The development server runs at `http://localhost:5173`.
+
+## Environment variable
+
+```env
+VITE_API_BASE_URL=http://localhost:5048/api
+```
+
+`VITE_API_BASE_URL` must include the backend `/api` prefix. Vite variables are embedded at build time, so changing this value on Vercel requires a new deployment.
+
+## Available commands
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm dev` | Start the Vite development server |
+| `pnpm build` | Type-check and create a production build |
+| `pnpm preview` | Preview the production build locally |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run all Vitest tests once |
+| `pnpm test:watch` | Run Vitest in watch mode |
+
+## Tests
+
+The frontend suite covers:
+
+- protected-route loading, redirect, and authenticated states
+- safe API error-message selection
+- access-token storage and removal
+
+Run it with:
+
+```bash
+pnpm test
+```
+
+## Vercel deployment
+
+Import the GitHub repository into Vercel and configure:
+
+| Setting | Value |
+| --- | --- |
+| Framework Preset | Vite |
+| Root Directory | `frontend` |
+| Build Command | `pnpm build` |
+| Output Directory | `dist` |
+
+Add this Production environment variable:
+
+```env
+VITE_API_BASE_URL=https://rick-morty-platform-ecv1.onrender.com/api
+```
+
+The included `vercel.json` rewrites application routes to `index.html`, allowing direct navigation and browser refreshes on paths such as `/characters/1`.
+
+After deployment, set the backend Render variable to the exact Vercel origin without a trailing slash:
+
+```env
+FrontendOrigin=https://rick-morty-platform-chi.vercel.app
 ```
